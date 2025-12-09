@@ -6,7 +6,7 @@ Allows user to experiment with simulates elastic collisions between particles, s
 
 ### Use online
 
-See automatically deployed page [here]()
+See automatically deployed page **[here](https://jvaltteri.github.io/elastic-collisions/)**
 
 ### Download offline
 
