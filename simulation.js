@@ -5,8 +5,8 @@ const BG_COLOR = '#fff';
 /* ----------  CANVAS SET‑UP ---------- */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const targetWidth = 980;
 let width = canvas.width;
-let height = canvas.height;
 
 /* ----------  UI ELEMENTS ---------- */
 const numberSlider = document.getElementById('numberSlider');
@@ -112,8 +112,7 @@ function resolveBallCollision(a, b) {
 function resizeCanvas() {
   // subtract UI height
   const margin = view.offsetTop;
-  console.log(view); //////////////
-  canvas.width  = (window.innerWidth > 800 ? 800 : window.innerWidth);
+  canvas.width  = ( window.innerWidth > targetWidth ? targetWidth : window.innerWidth );
   canvas.height = window.innerHeight - 2*margin;
 
   width  = canvas.width;

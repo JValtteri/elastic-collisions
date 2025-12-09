@@ -44,6 +44,22 @@
     margin:auto;
     background:#646464;
   }
+  @media (max-width: 1200px) {
+    #view {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      grid-template-columns: auto;
+      grid-template-rows: auto auto;
+    }
+  }
+  @media (max-height: 900px) {
+    #view {
+      margin-top: 0px;
+      margin-bottom: 0px;
+      grid-template-columns: max-content auto;
+      grid-template-rows: auto;
+    }
+  }
 </style>
 </head>
 <body>
