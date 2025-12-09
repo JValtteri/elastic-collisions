@@ -5,8 +5,8 @@ const BG_COLOR = '#fff';
 /* ----------  CANVAS SET‑UP ---------- */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
-const WIDTH = canvas.width;
-const HEIGHT = canvas.height;
+let width = canvas.width;
+let height = canvas.height;
 
 /* ----------  UI ELEMENTS ---------- */
 const numberSlider = document.getElementById('numberSlider');
@@ -56,16 +56,16 @@ class Ball {
       this.x = this.r;
       this.vx = Math.abs(this.vx);
     }
-    if (this.x + this.r > WIDTH) {
-      this.x = WIDTH - this.r;
+    if (this.x + this.r > width) {
+      this.x = width - this.r;
       this.vx = -Math.abs(this.vx);
     }
     if (this.y - this.r < 0) {
       this.y = this.r;
       this.vy = Math.abs(this.vy);
     }
-    if (this.y + this.r > HEIGHT) {
-      this.y = HEIGHT - this.r;
+    if (this.y + this.r > height) {
+      this.y = height - this.r;
       this.vy = -Math.abs(this.vy);
     }
   }
@@ -108,13 +108,35 @@ function resolveBallCollision(a, b) {
   b.y += overlap * ny;
 }
 
+/* ----------  RESIZING ---------- */
+function resizeCanvas() {
+  // subtract UI height
+  const margin = view.offsetTop;
+  console.log(view); //////////////
+  canvas.width  = (window.innerWidth > 800 ? 800 : window.innerWidth);
+  canvas.height = window.innerHeight - 2*margin;
+
+  width  = canvas.width;
+  height = canvas.height;
+
+  // clamp balls to new bounds (important when canvas shrinks)
+  for (const b of balls) {
+    if (b.x - b.r < 0) b.x = b.r;
+    if (b.x + b.r > width) b.x = width - b.r;
+    if (b.y - b.r < 0) b.y = b.r;
+    if (b.y + b.r > height) b.y = height - b.r;
+  }
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();     // initialise once
+
 /* ----------  INITIALISE BALLS ---------- */
 function initBalls() {
   balls = [];
   for (let i = 0; i < numBalls; i++) {
     let r = radius;
-    let x = r + Math.random() * (WIDTH - 2 * r);
-    let y = r + Math.random() * (HEIGHT - 2 * r);
+    let x = r + Math.random() * (width - 2 * r);
+    let y = r + Math.random() * (height - 2 * r);
 
     // random direction & speed
     const angle = Math.random() * Math.PI * 2;
@@ -136,7 +158,7 @@ function animate(time) {
 
   // clear
   ctx.fillStyle = BG_COLOR;
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.fillRect(0, 0, width, height);
 
   // move & draw balls
   for (const ball of balls) {
