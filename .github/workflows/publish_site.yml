@@ -21,5 +21,5 @@ jobs:
         uses: rayluo/github-pages-overwriter@v1.3
 
         with:
-          source-directory: static
+          source-directory: /
           target-branch: gh-pages
