@@ -1,8 +1,8 @@
 /* ----------  CONFIGURATION ---------- */
-const BALL_COLOR = '#3a5fcd';
-const BG_COLOR = '#fff';
+const BALL_COLOR = '#527dff';
+const BG_COLOR = '#000';
 
-/* ----------  CANVAS SET‑UP ---------- */
+/* ----------  CANVAS SET-UP ---------- */
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const targetWidth = 980;
