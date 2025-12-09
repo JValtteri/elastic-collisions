@@ -1,0 +1,57 @@
+body {
+    font-family: sans-serif;
+    margin: auto;
+    background:#222;
+    color: #fff;
+}
+#view {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    width: max-content;
+    display: grid;
+    grid-template-columns: max-content auto;
+}
+#ui {
+    padding: 10px;
+    border:1px solid #aaa;
+    display: grid;
+    grid-template-rows: min-content min-content min-content min-content min-content;
+    row-gap: 1em;
+}
+#ui label {
+    margin-right: 8px;
+    height: min-content;
+}
+#ui input[type=range] {
+    vertical-align: middle;
+}
+#ui span {
+    display:inline-block; width:30px; text-align:center;
+}
+#resetBtn {
+    height: max-content;
+    width: max-content;
+}
+canvas {
+    display:block;
+    margin:auto;
+    background:#646464;
+}
+@media (max-width: 1200px) {
+    #view {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    grid-template-columns: auto;
+    grid-template-rows: auto auto;
+    }
+}
+@media (max-height: 900px) {
+    #view {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    grid-template-columns: max-content auto;
+    grid-template-rows: auto;
+    }
+}
