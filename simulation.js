@@ -1,5 +1,4 @@
 /* ----------  CONFIGURATION ---------- */
-const NUM_BALLS = 12;              // how many balls at start
 const BALL_COLOR = '#3a5fcd';
 const BG_COLOR = '#fff';
 
@@ -10,6 +9,7 @@ const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 
 /* ----------  UI ELEMENTS ---------- */
+const numberSlider = document.getElementById('numberSlider');
 const sizeSlider   = document.getElementById('sizeSlider');
 const gravitySlider= document.getElementById('gravitySlider');
 const speedSlider  = document.getElementById('speedSlider');
@@ -20,6 +20,7 @@ const speedVal     = document.getElementById('speedVal');
 
 /* ----------  STATE ---------- */
 let balls = [];
+let numBalls = parseInt(numberSlider.value);              // how many balls at start
 let radius = parseFloat(sizeSlider.value);
 let gravity = parseFloat(gravitySlider.value);
 let maxSpeed = parseFloat(speedSlider.value);
@@ -110,7 +111,7 @@ function resolveBallCollision(a, b) {
 /* ----------  INITIALISE BALLS ---------- */
 function initBalls() {
   balls = [];
-  for (let i = 0; i < NUM_BALLS; i++) {
+  for (let i = 0; i < numBalls; i++) {
     let r = radius;
     let x = r + Math.random() * (WIDTH - 2 * r);
     let y = r + Math.random() * (HEIGHT - 2 * r);
@@ -155,7 +156,20 @@ function animate(time) {
   requestAnimationFrame(animate);
 }
 
+/* ----------- SET LABEL VALUES ----------- */
+
+sizeVal.textContent = radius.toFixed(0);
+numVal.textContent = numberSlider.value;
+gravityVal.textContent = gravity.toFixed(2);
+speedVal.textContent = maxSpeed.toFixed(1);
+
 /* ----------  UI EVENT LISTENERS ---------- */
+
+numberSlider.addEventListener('input', e => {
+  numBalls = numberSlider.value;
+  numVal.textContent = numberSlider.value;
+});
+
 sizeSlider.addEventListener('input', e => {
   radius = parseFloat(e.target.value);
   sizeVal.textContent = radius.toFixed(0);
