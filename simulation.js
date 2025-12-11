@@ -1,5 +1,6 @@
 /* ----------  CONFIGURATION ---------- */
-const BALL_COLOR = '#527dff';
+const INERT_BALL_COLOR = '#527dff';
+const MAGNETIC_BALL_COLOR = '#ff5252';
 const BG_COLOR = '#000';
 
 /* ----------  CANVAS SET-UP ---------- */
@@ -9,14 +10,10 @@ const targetWidth = 980;
 let width = canvas.width;
 
 /* ----------  UI ELEMENTS ---------- */
-const numberSlider = document.getElementById('numberSlider');
-const sizeSlider   = document.getElementById('sizeSlider');
-const gravitySlider= document.getElementById('gravitySlider');
-const speedSlider  = document.getElementById('speedSlider');
-const resetBtn     = document.getElementById('resetBtn');
-const sizeVal      = document.getElementById('sizeVal');
-const gravityVal   = document.getElementById('gravityVal');
-const speedVal     = document.getElementById('speedVal');
+
+/*
+ * Element ID is automatically a variable. No need to getElementById()
+ */
 
 /* ----------  STATE ---------- */
 let balls = [];
@@ -24,21 +21,24 @@ let numBalls = parseInt(numberSlider.value);              // how many balls at s
 let radius = parseFloat(sizeSlider.value);
 let gravity = parseFloat(gravitySlider.value);
 let maxSpeed = parseFloat(speedSlider.value);
+let mode = 0;
 
 /* ----------  BALL CLASS ---------- */
 class Ball {
-  constructor(x, y, vx, vy, r) {
+  constructor(x, y, vx, vy, r, color, magnetic) {
     this.x  = x;
     this.y  = y;
     this.vx = vx;
     this.vy = vy;
     this.r  = r;
+    this.color = color;
+    this.magnetic = magnetic;
   }
 
   draw() {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
-    ctx.fillStyle = BALL_COLOR;
+    ctx.fillStyle = this.color;
     ctx.fill();
   }
 
@@ -108,6 +108,10 @@ function resolveBallCollision(a, b) {
   b.y += overlap * ny;
 }
 
+
+/* --- MAGNETISM --- */
+
+
 /* ----------  RESIZING ---------- */
 function resizeCanvas() {
   // subtract UI height
@@ -133,19 +137,32 @@ resizeCanvas();     // initialise once
 function initBalls() {
   balls = [];
   for (let i = 0; i < numBalls; i++) {
-    let r = radius;
-    let x = r + Math.random() * (width - 2 * r);
-    let y = r + Math.random() * (height - 2 * r);
-
-    // random direction & speed
-    const angle = Math.random() * Math.PI * 2;
-    const speed = Math.random() * maxSpeed;
-    const vx = Math.cos(angle) * speed;
-    const vy = Math.sin(angle) * speed;
-
-    const b = new Ball(x, y, vx, vy, r);
+    let x = radius + Math.random() * (width - 2 * radius);
+    let y = radius + Math.random() * (height - 2 * radius);
+    b = initSingleBall(x, y, INERT_BALL_COLOR, false);
     balls.push(b);
   }
+}
+
+function initSingleBall(x, y, color, magnetic) {
+  let r = radius;
+
+  // random direction & speed
+  const angle = Math.random() * Math.PI * 2;
+  const speed = Math.random() * maxSpeed;
+  const vx = Math.cos(angle) * speed;
+  const vy = Math.sin(angle) * speed;
+
+  return new Ball(x, y, vx, vy, r, color, magnetic);
+}
+
+function customPlaceBall(x, y, type) {
+  let color = MAGNETIC_BALL_COLOR
+  if (type == 1) {
+    color = INERT_BALL_COLOR
+  }
+  b = initSingleBall(x, y, color, true);
+  balls.push(b);
 }
 
 /* ----------  MAIN LOOP ---------- */
@@ -210,6 +227,42 @@ speedSlider.addEventListener('input', e => {
 
 resetBtn.addEventListener('click', () => {
   initBalls();
+});
+
+
+placeNone.addEventListener('click', () => {
+  placeBlue.classList.remove("active");
+  placeRed.classList.remove("active");
+  placeWall.classList.remove("active");
+  mode = 0
+});
+placeBlue.addEventListener('click', () => {
+  placeBlue.classList.add("active");
+  placeRed.classList.remove("active");
+  placeWall.classList.remove("active");
+  mode = 1
+});
+placeRed.addEventListener('click', () => {
+  placeBlue.classList.remove("active");
+  placeRed.classList.add("active");
+  placeWall.classList.remove("active");
+  mode = 2
+});
+placeWall.addEventListener('click', () => {
+  placeBlue.classList.remove("active");
+  placeRed.classList.remove("active");
+  placeWall.classList.add("active");
+  mode = 3
+});
+
+/* ----------  MOUSE EVENT LISTENERS ---------- */
+
+canvas.addEventListener('click', e => {
+  if (mode != 1 && mode != 2 ) return
+  const rect = canvas.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  customPlaceBall(x, y, mode);
 });
 
 /* ----------  START ---------- */
