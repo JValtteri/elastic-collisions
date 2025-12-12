@@ -21,6 +21,8 @@ let numBalls = parseInt(numberSlider.value);              // how many balls at s
 let radius = parseFloat(sizeSlider.value);
 let gravity = parseFloat(gravitySlider.value);
 let maxSpeed = parseFloat(speedSlider.value);
+let magnetism = parseFloat(magnetismForceSlider.value);
+let magnetismRadius = parseInt(magnetismRadiusSlider.value);
 let mode = 0;
 
 /* ----------  BALL CLASS ---------- */
@@ -111,6 +113,24 @@ function resolveBallCollision(a, b) {
 
 /* --- MAGNETISM --- */
 
+function resolveMagnetism(a, b, dt) {
+  if (!a.magnetic || !b.magnetic) return;         // Ignore inert balls
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const dist = Math.hypot(dx, dy);
+  if (dist > a.r + b.r + magnetismRadius) return; // Outside magnetism radius
+
+  // normal & tangent vectors
+  const nx = dx / dist;
+  const ny = dy / dist;
+
+  // Apply the pull
+  a.vx += nx/Math.abs(nx) * magnetism * dt;
+  a.vy += ny/Math.abs(ny) * magnetism * dt;
+
+  b.vx -= nx/Math.abs(nx) * magnetism * dt;
+  b.vy -= ny/Math.abs(ny) * magnetism * dt;
+}
 
 /* ----------  RESIZING ---------- */
 function resizeCanvas() {
@@ -161,7 +181,7 @@ function customPlaceBall(x, y, type) {
   if (type == 1) {
     color = INERT_BALL_COLOR
   }
-  b = initSingleBall(x, y, color, true);
+  b = initSingleBall(x, y, color, (type === 2));
   balls.push(b);
 }
 
@@ -185,7 +205,9 @@ function animate(time) {
   // ball‑ball collisions
   for (let i = 0; i < balls.length; i++) {
     for (let j = i + 1; j < balls.length; j++) {
+      console.log(`${i} ${j}`)
       resolveBallCollision(balls[i], balls[j]);
+      resolveMagnetism(balls[i], balls[j], dt);
     }
   }
 
@@ -200,8 +222,10 @@ sizeVal.textContent = radius.toFixed(0);
 numVal.textContent = numberSlider.value;
 gravityVal.textContent = gravity.toFixed(2);
 speedVal.textContent = maxSpeed.toFixed(1);
+magnetismForceVal.textContent = magnetism.toFixed(2);
+magnetismRadVal.textContent = magnetismRadius.toFixed(1);
 
-/* ----------  UI EVENT LISTENERS ---------- */
+/* --------  UI SLIDERR LISTENERS -------- */
 
 numberSlider.addEventListener('input', e => {
   numBalls = numberSlider.value;
@@ -225,10 +249,22 @@ speedSlider.addEventListener('input', e => {
   speedVal.textContent = maxSpeed.toFixed(1);
 });
 
+magnetismForceSlider.addEventListener('input', e => {
+  magnetism = parseFloat(e.target.value);
+  magnetismForceVal.textContent = magnetism.toFixed(2);
+});
+
+magnetismRadiusSlider.addEventListener('input', e => {
+  magnetismRadius = parseFloat(e.target.value);
+  magnetismRadVal.textContent = magnetismRadius.toFixed(1);
+});
+
+
+/* ---------  BUTTON LISTENERS --------- */
+
 resetBtn.addEventListener('click', () => {
   initBalls();
 });
-
 
 placeNone.addEventListener('click', () => {
   placeBlue.classList.remove("active");

@@ -58,6 +58,9 @@ button:active {
 #ui span {
     display:inline-block; width:30px; text-align:center;
 }
+.title {
+    width: fit-content !important;
+}
 canvas {
     display:block;
     margin:auto;
