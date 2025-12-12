@@ -2,6 +2,7 @@
 const INERT_BALL_COLOR = '#527dff';
 const MAGNETIC_BALL_COLOR = '#ff5252';
 const BG_COLOR = '#000';
+const DAMPING = 0.99995; // Apply damping to counteract calculation inaccuracies
 
 /* ----------  CANVAS SET-UP ---------- */
 const canvas = document.getElementById('canvas');
@@ -23,6 +24,8 @@ let gravity = parseFloat(gravitySlider.value);
 let maxSpeed = parseFloat(speedSlider.value);
 let magnetism = parseFloat(magnetismForceSlider.value);
 let magnetismRadius = parseInt(magnetismRadiusSlider.value);
+// let totalEnergy = 0;
+// let maxTotalEnergy = 0;
 let mode = 0;
 
 /* ----------  BALL CLASS ---------- */
@@ -112,17 +115,18 @@ function resolveBallCollision(a, b) {
 
 
 /* --- MAGNETISM --- */
-
 function resolveMagnetism(a, b, dt) {
   if (!a.magnetic || !b.magnetic) return;         // Ignore inert balls
   const dx = b.x - a.x;
   const dy = b.y - a.y;
+
   const dist = Math.hypot(dx, dy);
 
-  // if balls are exactly on top of each other, skip the force
-  if (dist === 0) return;          // or: if (dist < 1e-6)
+  /* Skip if the particles are on top of each other */
+  if (dist < 1) return;
 
-  if (dist > a.r + b.r + magnetismRadius) return; // Outside magnetism radius
+  /* Outside the interaction radius? */
+  if (dist > a.r + b.r + magnetismRadius) return;
 
   // normal & tangent vectors
   const nx = dx / dist;
@@ -130,11 +134,18 @@ function resolveMagnetism(a, b, dt) {
 
   // Apply the pull
   // Conditions to avoid divide by zero
-  a.vx += (nx == 0 ? 0 : nx * magnetism * dt);
-  a.vy += (ny == 0 ? 0 : ny * magnetism * dt);
-
-  b.vx -= (nx == 0 ? 0 : nx * magnetism * dt);
-  b.vy -= (ny == 0 ? 0 : ny * magnetism * dt);
+  if (nx != 0) {
+    a.vx += nx * magnetism * dt;
+    b.vx -= nx * magnetism * dt;
+    a.vx *= DAMPING;     // Apply damping to counteract calculation inaccuracies
+    b.vx *= DAMPING;     // that have a tendency increase total system energy
+  }                      // and destabilizing orbits
+  if (ny != 0) {
+    a.vy += ny * magnetism * dt;
+    b.vy -= ny * magnetism * dt;
+    a.vy *= DAMPING;
+    b.vy *= DAMPING;
+  }
 }
 
 /* ----------  RESIZING ---------- */
@@ -213,7 +224,11 @@ function animate(time) {
       resolveMagnetism(balls[i], balls[j], dt);
       resolveBallCollision(balls[i], balls[j]);
     }
+    //totalEnergy += Math.abs(balls[i].vx) + Math.abs(balls[i].vy);
   }
+  //maxTotalEnergy = ( totalEnergy > maxTotalEnergy ? maxTotalEnergy = totalEnergy : maxTotalEnergy );
+  //console.log(`Total Energy: ${maxTotalEnergy.toFixed(1)}, ${totalEnergy.toFixed(1)}`);
+  //totalEnergy = 0;
 
   for (const ball of balls) ball.draw();
 
