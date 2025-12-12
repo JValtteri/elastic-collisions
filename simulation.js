@@ -118,6 +118,10 @@ function resolveMagnetism(a, b, dt) {
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const dist = Math.hypot(dx, dy);
+
+  // if balls are exactly on top of each other, skip the force
+  if (dist === 0) return;          // or: if (dist < 1e-6)
+
   if (dist > a.r + b.r + magnetismRadius) return; // Outside magnetism radius
 
   // normal & tangent vectors
@@ -125,11 +129,12 @@ function resolveMagnetism(a, b, dt) {
   const ny = dy / dist;
 
   // Apply the pull
-  a.vx += nx/Math.abs(nx) * magnetism * dt;
-  a.vy += ny/Math.abs(ny) * magnetism * dt;
+  // Conditions to avoid divide by zero
+  a.vx += (nx == 0 ? 0 : nx/Math.abs(nx) * magnetism * dt);
+  a.vy += (ny == 0 ? 0 : ny/Math.abs(ny) * magnetism * dt);
 
-  b.vx -= nx/Math.abs(nx) * magnetism * dt;
-  b.vy -= ny/Math.abs(ny) * magnetism * dt;
+  b.vx -= (nx == 0 ? 0 : nx/Math.abs(nx) * magnetism * dt);
+  b.vy -= (ny == 0 ? 0 : ny/Math.abs(ny) * magnetism * dt);
 }
 
 /* ----------  RESIZING ---------- */
@@ -202,12 +207,11 @@ function animate(time) {
     ball.collideWall();
   }
 
-  // ball‑ball collisions
+  // ball-ball collisions
   for (let i = 0; i < balls.length; i++) {
     for (let j = i + 1; j < balls.length; j++) {
-      console.log(`${i} ${j}`)
-      resolveBallCollision(balls[i], balls[j]);
       resolveMagnetism(balls[i], balls[j], dt);
+      resolveBallCollision(balls[i], balls[j]);
     }
   }
 
