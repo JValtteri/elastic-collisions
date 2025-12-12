@@ -130,11 +130,11 @@ function resolveMagnetism(a, b, dt) {
 
   // Apply the pull
   // Conditions to avoid divide by zero
-  a.vx += (nx == 0 ? 0 : nx/Math.abs(nx) * magnetism * dt);
-  a.vy += (ny == 0 ? 0 : ny/Math.abs(ny) * magnetism * dt);
+  a.vx += (nx == 0 ? 0 : nx * magnetism * dt);
+  a.vy += (ny == 0 ? 0 : ny * magnetism * dt);
 
-  b.vx -= (nx == 0 ? 0 : nx/Math.abs(nx) * magnetism * dt);
-  b.vy -= (ny == 0 ? 0 : ny/Math.abs(ny) * magnetism * dt);
+  b.vx -= (nx == 0 ? 0 : nx * magnetism * dt);
+  b.vy -= (ny == 0 ? 0 : ny * magnetism * dt);
 }
 
 /* ----------  RESIZING ---------- */
