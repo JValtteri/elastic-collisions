@@ -28,6 +28,7 @@ let magnetismRadius = parseInt(magnetismRadiusSlider.value);
 // let maxTotalEnergy = 0;
 let mode = 0;
 
+
 /* ----------  BALL CLASS ---------- */
 class Ball {
   constructor(x, y, vx, vy, r, color, magnetic) {
@@ -75,6 +76,17 @@ class Ball {
     }
   }
 }
+
+/* ---------- BALL TYPES ---------- */
+class BallType {
+  constructor(color, magnetic) {
+    this.color = color;
+    this.magnetic = magnetic;
+  }
+}
+
+const magnetic = new BallType(MAGNETIC_BALL_COLOR, true);
+const inert = new BallType(INERT_BALL_COLOR, false);
 
 /* ----------  COLLISION RESOLUTION ---------- */
 function resolveBallCollision(a, b) {
@@ -175,17 +187,17 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();     // initialise once
 
 /* ----------  INITIALISE BALLS ---------- */
-function initBalls() {
+function initBalls(type) {
   balls = [];
   for (let i = 0; i < numBalls; i++) {
     let x = radius + Math.random() * (width - 2 * radius);
     let y = radius + Math.random() * (height - 2 * radius);
-    b = initSingleBall(x, y, INERT_BALL_COLOR, false);
+    b = initSingleBall(x, y, type);
     balls.push(b);
   }
 }
 
-function initSingleBall(x, y, color, magnetic) {
+function initSingleBall(x, y, type) {
   let r = radius;
 
   // random direction & speed
@@ -194,15 +206,11 @@ function initSingleBall(x, y, color, magnetic) {
   const vx = Math.cos(angle) * speed;
   const vy = Math.sin(angle) * speed;
 
-  return new Ball(x, y, vx, vy, r, color, magnetic);
+  return new Ball(x, y, vx, vy, r, type.color, type.magnetic);
 }
 
 function customPlaceBall(x, y, type) {
-  let color = MAGNETIC_BALL_COLOR
-  if (type == 1) {
-    color = INERT_BALL_COLOR
-  }
-  b = initSingleBall(x, y, color, (type === 2));
+  b = initSingleBall(x, y, type);
   balls.push(b);
 }
 
@@ -287,7 +295,7 @@ magnetismRadiusSlider.addEventListener('input', e => {
 /* ---------  BUTTON LISTENERS --------- */
 
 resetBtn.addEventListener('click', () => {
-  initBalls();
+  initBalls( ( mode==2 ? magnetic : inert ) );
 });
 
 placeNone.addEventListener('click', () => {
@@ -319,13 +327,18 @@ placeWall.addEventListener('click', () => {
 
 canvas.addEventListener('click', e => {
   if (mode != 1 && mode != 2 ) return
+  if (mode == 1) {
+    type = inert;
+  } else if (mode == 2) {
+    type = magnetic;
+  }
   const rect = canvas.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
-  customPlaceBall(x, y, mode);
+  customPlaceBall(x, y, type);
 });
 
 /* ----------  START ---------- */
-initBalls();
+initBalls(inert);
 requestAnimationFrame(animate);
 resizeCanvas();
