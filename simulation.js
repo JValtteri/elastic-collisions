@@ -150,10 +150,15 @@ function resolveMagnetism(a, b, dt) {
 
 /* ----------  RESIZING ---------- */
 function resizeCanvas() {
-  // subtract UI height
-  const margin = view.offsetTop;
-  canvas.width  = ( window.innerWidth > targetWidth ? targetWidth : window.innerWidth );
-  canvas.height = window.innerHeight - 2*margin;
+  const topmargin = canvas.offsetTop;
+  const leftmargin = canvas.offsetLeft;
+
+  if (screen.height < 900) {
+    canvas.height = screen.availHeight;
+  } else {
+    canvas.height = window.innerHeight - topmargin;
+  }
+  canvas.width  = window.innerWidth - leftmargin;
 
   width  = canvas.width;
   height = canvas.height;
@@ -323,3 +328,4 @@ canvas.addEventListener('click', e => {
 /* ----------  START ---------- */
 initBalls();
 requestAnimationFrame(animate);
+resizeCanvas();

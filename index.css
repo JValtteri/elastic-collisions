@@ -33,8 +33,6 @@ button:active {
 #view {
     margin-left: auto;
     margin-right: auto;
-    margin-top: 50px;
-    margin-bottom: 50px;
     width: max-content;
     display: grid;
     grid-template-columns: max-content auto;
@@ -44,9 +42,6 @@ button:active {
     border:1px solid var(--element-color);
     border-radius: 12px;
     background-color: var(--element-color);
-    display: grid;
-    grid-template-rows: min-content min-content min-content min-content min-content;
-    row-gap: 1em;
 }
 #ui label {
     margin-right: 8px;
@@ -58,27 +53,45 @@ button:active {
 #ui span {
     display:inline-block; width:30px; text-align:center;
 }
-.title {
-    width: fit-content !important;
+#controls {
+    height: max-content;
+    display: grid;
+    grid-template-rows: min-content min-content min-content min-content min-content;
+    row-gap: 1em;
+}
+#modeButtons {
+    display: grid;
+    grid-template-columns: max-content max-content;
 }
 canvas {
     display:block;
     margin:auto;
     background:#646464;
 }
-@media (max-width: 1200px) {
+
+@media (max-width: 900px) {
+    #modeButtons {
+        grid-template-columns: max-content;
+    }
     #view {
-    margin-top: 0px;
-    margin-bottom: 0px;
-    grid-template-columns: auto;
-    grid-template-rows: auto auto;
+        margin-left: 0px;
+        margin-right: 0px;
+    }
+    label, span {
+        font-size: small;
+        padding-right: 0px;
     }
 }
-@media (max-height: 900px) {
+
+@media (max-width: 700px) {
+    label, span {
+        font-size: small;
+        padding-right: 0px;
+    }
     #view {
-    margin-top: 0px;
-    margin-bottom: 0px;
-    grid-template-columns: max-content auto;
-    grid-template-rows: auto;
+        grid-template-columns: auto;
+        grid-template-rows: auto auto;
+        margin-left: 0px;
+        margin-right: 0px;
     }
 }
