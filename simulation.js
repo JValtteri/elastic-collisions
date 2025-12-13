@@ -339,6 +339,6 @@ canvas.addEventListener('click', e => {
 });
 
 /* ----------  START ---------- */
+resizeCanvas();
 initBalls(inert);
 requestAnimationFrame(animate);
-resizeCanvas();
