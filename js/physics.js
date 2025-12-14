@@ -93,14 +93,14 @@ export function resolveMagnetism(a, b, dt) {
   // Apply the pull
   // Conditions to avoid divide by zero
   if (nx != 0) {
-    a.vx += nx * force * dt * laws.tscale;
-    b.vx -= nx * force * dt * laws.tscale;
+    a.vx += nx * force / a.m * dt * laws.tscale;
+    b.vx -= nx * force / b.m * dt * laws.tscale;
     a.vx *= (1 - tDamping);     // Apply damping to counteract calculation inaccuracies
     b.vx *= (1 - tDamping);     // that have a tendency increase total system energy
   }                      // and destabilizing orbits
   if (ny != 0) {
-    a.vy += ny * force * dt * laws.tscale;
-    b.vy -= ny * force * dt * laws.tscale;
+    a.vy += ny * force / a.m * dt * laws.tscale;
+    b.vy -= ny * force / b.m * dt * laws.tscale;
     a.vy *= (1 - tDamping);
     b.vy *= (1 - tDamping);
   }
