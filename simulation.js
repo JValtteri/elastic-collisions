@@ -54,6 +54,7 @@ class Ball {
     this.color = type.color;
     this.magnetic = type.magnetic;
     this.next = type.next;
+    this.remove = false;
   }
 
   draw() {
@@ -111,14 +112,15 @@ const inert = new BallType(INERT_BALL_COLOR, false, 1, "null");
 /* ----------  COLLISION RESOLUTION ---------- */
 
 function resolveBallCollision(a, b) {
-  if ( fusion ) {
-    resolveFusion(a, b);
-    return;
-  }
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const dist = Math.hypot(dx, dy);
   if (dist === 0 || dist > a.r + b.r) return; // no overlap or already separated
+  if (a.remove || b.remove) return;
+
+  if ( fusion) {
+    if (resolveFusion(a, b)) return;
+  }
 
   // normal & tangent vectors
   const nx = dx / dist;
@@ -196,7 +198,20 @@ function resolveMagnetism(a, b, dt) {
 /* --- FUSION --- */
 
 function resolveFusion(a, b) {
-  Math.random()
+
+  if (!a.magnetic || !b.magnetic) return false;   // Fuse only magnetic elements
+  if (Math.random() > (1/fusionP)) return false;  // Fuse chance
+  if (a.next == null) return false;               // Don't fuse heavies elements
+  if (a.m != b.m) return false;                   // Don't fuse heterogenious pairs
+  newX = a.x + (a.x - b.x) / 2
+  newY = a.y + (a.y - b.y) / 2
+  newVX = (a.x + b.x) / a.m;
+  newVY = (a.y + b.y) / a.m;
+  let ball = new Ball(newX, newY, newVX, newVY, radius, a.next);
+  balls.push(ball);
+  a.remove = true;
+  b.remove = true;
+  return true;
 }
 
 /* ----------  RESIZING ---------- */
@@ -274,6 +289,9 @@ function animate(time) {
     }
   }
 
+  // Remove marked balls
+  balls = balls.filter(ball => !ball.remove);
+
   for (const ball of balls) ball.draw();
 
   requestAnimationFrame(animate);
@@ -336,7 +354,7 @@ fusionRatio.addEventListener('input', e => {
 });
 
 fusionImpulse.addEventListener('input', e => {
-  fusionI = fusionImpulse(e.target.value);
+  fusionI = parseInt(e.target.value);
   fusionImpulseVal.textContent = fusionI.toFixed(0);
 });
 
@@ -351,35 +369,38 @@ placeNone.addEventListener('click', () => {
   Array.from(switches).forEach(element => {
     element.classList.remove("active");
   });
-  insertMode = 0
+  insertMode = 0;
 });
 placeBlue.addEventListener('click', () => {
   Array.from(switches).forEach(element => {
     element.classList.remove("active");
   });
   placeBlue.classList.add("active");
-  insertMode = 1
+  insertMode = 1;
 });
 placeRed.addEventListener('click', () => {
   Array.from(switches).forEach(element => {
     element.classList.remove("active");
   });
   placeRed.classList.add("active");
-  insertMode = 2
+  insertMode = 2;
 });
 placeYellow.addEventListener('click', () => {
   Array.from(switches).forEach(element => {
     element.classList.remove("active");
   });
   placeYellow.classList.add("active");
-  insertMode = 3
+  insertMode = 3;
 });
 placeWall.addEventListener('click', () => {
   Array.from(switches).forEach(element => {
     element.classList.remove("active");
   });
   placeWall.classList.add("active");
-  insertMode = 4
+  insertMode = 4;
+});
+fusionEnabled.addEventListener('click', () => {
+  fusion = fusionEnabled.checked;
 });
 
 /* ----------  MOUSE EVENT LISTENERS ---------- */
