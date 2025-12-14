@@ -1,10 +1,15 @@
 /* ----------  CONFIGURATION ---------- */
+
 const INERT_BALL_COLOR = '#527dff';
 const MAGNETIC_BALL_COLOR = '#ff5252';
+const BETA_BALL_COLOR = '#ffd152';
+const GAMMA_BALL_COLOR = '#66ff52';
+const DELTA_BALL_COLOR = '#9d52ff';
 const BG_COLOR = '#000';
 const DAMPING = 0.99995; // Apply damping to counteract calculation inaccuracies
 
 /* ----------  CANVAS SET-UP ---------- */
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const targetWidth = 980;
@@ -16,29 +21,39 @@ let width = canvas.width;
  * Element ID is automatically a variable. No need to getElementById()
  */
 
+const switches = document.getElementsByClassName('typeSwitch');
+
 /* ----------  STATE ---------- */
 let balls = [];
 let numBalls = parseInt(numberSlider.value);              // how many balls at start
 let radius = parseFloat(sizeSlider.value);
 let gravity = parseFloat(gravitySlider.value);
 let maxSpeed = parseFloat(speedSlider.value);
+
 let magnetism = parseFloat(magnetismForceSlider.value);
 let magnetismRadius = parseInt(magnetismRadiusSlider.value);
-// let totalEnergy = 0;
-// let maxTotalEnergy = 0;
-let mode = 0;
+
+let tscale = parseFloat(timescale.value);
+
+let fusion = fusionEnabled.checked;
+let fusionP = parseFloat(fusionRatio.value);
+let fusionI = parseFloat(fusionImpulse.value);
+
+let insertMode = 0;
 
 
 /* ----------  BALL CLASS ---------- */
 class Ball {
-  constructor(x, y, vx, vy, r, color, magnetic) {
+  constructor(x, y, vx, vy, r, type) {
     this.x  = x;
     this.y  = y;
     this.vx = vx;
     this.vy = vy;
     this.r  = r;
-    this.color = color;
-    this.magnetic = magnetic;
+    this.m  = type.mass;
+    this.color = type.color;
+    this.magnetic = type.magnetic;
+    this.next = type.next;
   }
 
   draw() {
@@ -79,17 +94,27 @@ class Ball {
 
 /* ---------- BALL TYPES ---------- */
 class BallType {
-  constructor(color, magnetic) {
+  constructor(color, magnetic, mass, next) {
     this.color = color;
     this.magnetic = magnetic;
+    this.mass = mass;
+    this.next = next;
   }
 }
 
-const magnetic = new BallType(MAGNETIC_BALL_COLOR, true);
-const inert = new BallType(INERT_BALL_COLOR, false);
+const delta = new BallType(DELTA_BALL_COLOR, true, 8, null);
+const gamma = new BallType(GAMMA_BALL_COLOR, true, 4, delta);
+const beta = new BallType(BETA_BALL_COLOR, true, 2, gamma);
+const alpha = new BallType(MAGNETIC_BALL_COLOR, true, 1, beta);
+const inert = new BallType(INERT_BALL_COLOR, false, 1, "null");
 
 /* ----------  COLLISION RESOLUTION ---------- */
+
 function resolveBallCollision(a, b) {
+  if ( fusion ) {
+    resolveFusion(a, b);
+    return;
+  }
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   const dist = Math.hypot(dx, dy);
@@ -102,14 +127,19 @@ function resolveBallCollision(a, b) {
   const ty = nx;
 
   // dot products
-  const vaDotN = a.vx * nx + a.vy * ny;
-  const vaDotT = a.vx * tx + a.vy * ty;
-  const vbDotN = b.vx * nx + b.vy * ny;
-  const vbDotT = b.vx * tx + b.vy * ty;
+  // Velocity components in normal / tangent directions
+  const vaDotN = a.vx * nx + a.vy * ny;  // a's normal component
+  const vaDotT = a.vx * tx + a.vy * ty;  // a's tangent component (unchanged)
+  const vbDotN = b.vx * nx + b.vy * ny;  // b's normal component
+  const vbDotT = b.vx * tx + b.vy * ty;  // b's tangent component (unchanged)
 
-  // swap normal components (equal masses, perfect elasticity)
-  const vaNewN = vbDotN;
-  const vbNewN = vaDotN;
+
+  // New normal velocities after collision, accounting for masses
+  const m1 = a.m;
+  const m2 = b.m;
+  const denom = m1 + m2;
+  const vaNewN = (vaDotN * (m1 - m2) + 2 * m2 * vbDotN) / denom;
+  const vbNewN = (vbDotN * (m2 - m1) + 2 * m1 * vaDotN) / denom;
 
   // convert back to (vx,vy)
   a.vx = vaNewN * nx + vaDotT * tx;
@@ -127,6 +157,7 @@ function resolveBallCollision(a, b) {
 
 
 /* --- MAGNETISM --- */
+
 function resolveMagnetism(a, b, dt) {
   if (!a.magnetic || !b.magnetic) return;         // Ignore inert balls
   const dx = b.x - a.x;
@@ -160,7 +191,14 @@ function resolveMagnetism(a, b, dt) {
   }
 }
 
+/* --- FUSION --- */
+
+function resolveFusion(a, b) {
+  Math.random()
+}
+
 /* ----------  RESIZING ---------- */
+
 function resizeCanvas() {
   const topmargin = canvas.offsetTop;
   const leftmargin = canvas.offsetLeft;
@@ -187,34 +225,29 @@ window.addEventListener('resize', resizeCanvas);
 resizeCanvas();     // initialise once
 
 /* ----------  INITIALISE BALLS ---------- */
+
 function initBalls(type) {
   balls = [];
   for (let i = 0; i < numBalls; i++) {
     let x = radius + Math.random() * (width - 2 * radius);
     let y = radius + Math.random() * (height - 2 * radius);
     b = initSingleBall(x, y, type);
-    balls.push(b);
   }
 }
 
 function initSingleBall(x, y, type) {
   let r = radius;
-
   // random direction & speed
   const angle = Math.random() * Math.PI * 2;
   const speed = Math.random() * maxSpeed;
   const vx = Math.cos(angle) * speed;
   const vy = Math.sin(angle) * speed;
-
-  return new Ball(x, y, vx, vy, r, type.color, type.magnetic);
-}
-
-function customPlaceBall(x, y, type) {
-  b = initSingleBall(x, y, type);
+  b = new Ball(x, y, vx, vy, r, type);
   balls.push(b);
 }
 
 /* ----------  MAIN LOOP ---------- */
+
 let lastTime = null;
 function animate(time) {
   if (!lastTime) lastTime = time;
@@ -237,11 +270,7 @@ function animate(time) {
       resolveMagnetism(balls[i], balls[j], dt);
       resolveBallCollision(balls[i], balls[j]);
     }
-    //totalEnergy += Math.abs(balls[i].vx) + Math.abs(balls[i].vy);
   }
-  //maxTotalEnergy = ( totalEnergy > maxTotalEnergy ? maxTotalEnergy = totalEnergy : maxTotalEnergy );
-  //console.log(`Total Energy: ${maxTotalEnergy.toFixed(1)}, ${totalEnergy.toFixed(1)}`);
-  //totalEnergy = 0;
 
   for (const ball of balls) ball.draw();
 
@@ -252,10 +281,13 @@ function animate(time) {
 
 sizeVal.textContent = radius.toFixed(0);
 numVal.textContent = numberSlider.value;
-gravityVal.textContent = gravity.toFixed(2);
-speedVal.textContent = maxSpeed.toFixed(1);
-magnetismForceVal.textContent = magnetism.toFixed(2);
-magnetismRadVal.textContent = magnetismRadius.toFixed(1);
+gravityVal.textContent = gravity.toFixed(1);
+speedVal.textContent = maxSpeed.toFixed(0);
+magnetismForceVal.textContent = magnetism.toFixed(0);
+magnetismRadVal.textContent = magnetismRadius.toFixed(0);
+timescaleVal.textContent = tscale.toFixed(2);
+fusionRatioVal.textContent = fusionP.toFixed(0);
+fusionImpulseVal.textContent = fusionI.toFixed(0);
 
 /* --------  UI SLIDERR LISTENERS -------- */
 
@@ -273,72 +305,100 @@ sizeSlider.addEventListener('input', e => {
 
 gravitySlider.addEventListener('input', e => {
   gravity = parseFloat(e.target.value);
-  gravityVal.textContent = gravity.toFixed(2);
+  gravityVal.textContent = gravity.toFixed(1);
 });
 
 speedSlider.addEventListener('input', e => {
   maxSpeed = parseFloat(e.target.value);
-  speedVal.textContent = maxSpeed.toFixed(1);
+  speedVal.textContent = maxSpeed.toFixed(0);
 });
 
 magnetismForceSlider.addEventListener('input', e => {
   magnetism = parseFloat(e.target.value);
-  magnetismForceVal.textContent = magnetism.toFixed(2);
+  magnetismForceVal.textContent = magnetism.toFixed(0);
 });
 
 magnetismRadiusSlider.addEventListener('input', e => {
   magnetismRadius = parseFloat(e.target.value);
-  magnetismRadVal.textContent = magnetismRadius.toFixed(1);
+  magnetismRadVal.textContent = magnetismRadius.toFixed(0);
+});
+
+timescale.addEventListener('input', e => {
+  tscale = parseFloat(e.target.value);
+  timescaleVal.textContent = tscale.toFixed(2);
+});
+
+fusionRatio.addEventListener('input', e => {
+  fusionP = parseFloat(e.target.value);
+  fusionRatioVal.textContent = fusionP.toFixed(0);
+});
+
+fusionImpulse.addEventListener('input', e => {
+  fusionI = fusionImpulse(e.target.value);
+  fusionImpulseVal.textContent = fusionI.toFixed(0);
 });
 
 
 /* ---------  BUTTON LISTENERS --------- */
 
 resetBtn.addEventListener('click', () => {
-  initBalls( ( mode==2 ? magnetic : inert ) );
+  initBalls( ( insertMode==2 ? alpha : inert ) );
 });
 
 placeNone.addEventListener('click', () => {
-  placeBlue.classList.remove("active");
-  placeRed.classList.remove("active");
-  placeWall.classList.remove("active");
-  mode = 0
+  Array.from(switches).forEach(element => {
+    element.classList.remove("active");
+  });
+  insertMode = 0
 });
 placeBlue.addEventListener('click', () => {
+  Array.from(switches).forEach(element => {
+    element.classList.remove("active");
+  });
   placeBlue.classList.add("active");
-  placeRed.classList.remove("active");
-  placeWall.classList.remove("active");
-  mode = 1
+  insertMode = 1
 });
 placeRed.addEventListener('click', () => {
-  placeBlue.classList.remove("active");
+  Array.from(switches).forEach(element => {
+    element.classList.remove("active");
+  });
   placeRed.classList.add("active");
-  placeWall.classList.remove("active");
-  mode = 2
+  insertMode = 2
+});
+placeYellow.addEventListener('click', () => {
+  Array.from(switches).forEach(element => {
+    element.classList.remove("active");
+  });
+  placeYellow.classList.add("active");
+  insertMode = 3
 });
 placeWall.addEventListener('click', () => {
-  placeBlue.classList.remove("active");
-  placeRed.classList.remove("active");
+  Array.from(switches).forEach(element => {
+    element.classList.remove("active");
+  });
   placeWall.classList.add("active");
-  mode = 3
+  insertMode = 4
 });
 
 /* ----------  MOUSE EVENT LISTENERS ---------- */
 
 canvas.addEventListener('click', e => {
-  if (mode != 1 && mode != 2 ) return
-  if (mode == 1) {
+  if (insertMode != 1 && insertMode != 2 && insertMode != 3 ) return
+  if (insertMode == 1) {
     type = inert;
-  } else if (mode == 2) {
-    type = magnetic;
+  } else if (insertMode == 2) {
+    type = alpha;
+  } else if (insertMode == 3) {
+    type = beta;
   }
   const rect = canvas.getBoundingClientRect()
   const x = e.clientX - rect.left
   const y = e.clientY - rect.top
-  customPlaceBall(x, y, type);
+  initSingleBall(x, y, type);
 });
 
 /* ----------  START ---------- */
+
 resizeCanvas();
 initBalls(inert);
 requestAnimationFrame(animate);

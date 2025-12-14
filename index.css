@@ -6,12 +6,20 @@
     --active-color: #00ff77;
     background-color: var(--background-color);
 }
+
 body {
     font-family: sans-serif;
     margin: auto;
     background:#222;
     color: #fff;
 }
+
+input {
+    font-size: medium;
+    border-radius: 5px;
+    border-color: var(--input-boarder-color);
+}
+
 button {
     border: 1px solid;
     border-color: var(--input-boarder-color);
@@ -21,15 +29,19 @@ button {
     height: 3em;
     transition: all 0.25s;
 }
+
 button:hover {
   border-color: var(--focus-color);
 }
+
 button:active {
     border-color: var(--active-color);
 }
+
 .active {
     border-color: var(--focus-color);
 }
+
 #view {
     margin-left: auto;
     margin-right: auto;
@@ -37,37 +49,49 @@ button:active {
     display: grid;
     grid-template-columns: max-content auto;
 }
+
 #ui {
     padding: 10px;
     border:1px solid var(--element-color);
     border-radius: 12px;
     background-color: var(--element-color);
 }
+
 #ui label {
     margin-right: 8px;
     height: min-content;
 }
+
 #ui input[type=range] {
     vertical-align: middle;
 }
+
 #ui span {
     display:inline-block; width:30px; text-align:center;
 }
+
 #controls {
     height: max-content;
     display: grid;
     grid-template-rows: min-content min-content min-content min-content min-content;
     row-gap: 1em;
 }
+
 #modeButtons {
     display: grid;
     grid-template-columns: max-content max-content;
 }
+
 canvas {
     display:block;
     margin:auto;
     background:#646464;
 }
+
+.hidden {
+    display: none !important;
+}
+
 
 @media (max-width: 900px) {
     #modeButtons {
