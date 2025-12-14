@@ -18,19 +18,18 @@ See automatically deployed page **[here](https://jvaltteri.github.io/elastic-col
 
 #### Server options
 
-##### Go-server
-A light server suitable for homelab: https://github.com/JValtteri/go-server
-
-##### Python server
-Not tested with this project, but may work
-
+##### Python server (easiest)
 Run this command in the project root
-
 ```
-screen -S front -d -m python -m http.server 8000
+python -m http.server 3000
 ```
 
-##### Pro server
+##### Go-server (intermediate)
+A light server suitable for homelab:
+
+[github.com/JValtteri/go-server](https://github.com/JValtteri/go-server)
+
+##### Pro server (pro)
 - nginx
 - caddy
 
