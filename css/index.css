@@ -21,6 +21,7 @@ input {
 }
 
 button {
+    color: #fff;
     border: 1px solid;
     border-color: var(--input-boarder-color);
     background-color: var(--element-color);
