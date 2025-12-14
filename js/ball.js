@@ -10,6 +10,7 @@ const DELTA_BALL_COLOR = '#9d52ff';
 
 export class Ball {
   constructor(x, y, vx, vy, r, type) {
+    this.typeID = type.id;
     this.x  = x;
     this.y  = y;
     this.vx = vx;
@@ -61,7 +62,8 @@ export class Ball {
 
 /* ---------- BALL TYPES ---------- */
 export class BallType {
-  constructor(color, magnetic, mass, next) {
+  constructor(id, color, magnetic, mass, next) {
+    this.id = id;
     this.color = color;
     this.magnetic = magnetic;
     this.mass = mass;
@@ -71,8 +73,8 @@ export class BallType {
 
 // Ball types
 
-export const delta = new BallType(DELTA_BALL_COLOR, true, 8, null);
-export const gamma = new BallType(GAMMA_BALL_COLOR, true, 4, delta);
-export const beta = new BallType(BETA_BALL_COLOR, true, 2, gamma);
-export const alpha = new BallType(MAGNETIC_BALL_COLOR, true, 1, beta);
-export const inert = new BallType(INERT_BALL_COLOR, false, 1, "null");
+export const delta = new BallType(4, DELTA_BALL_COLOR, true, 8, null);
+export const gamma = new BallType(3, GAMMA_BALL_COLOR, true, 4, delta);
+export const beta = new BallType(2, BETA_BALL_COLOR, true, 2, gamma);
+export const alpha = new BallType(1, MAGNETIC_BALL_COLOR, true, 1, beta);
+export const inert = new BallType(0, INERT_BALL_COLOR, false, 1, "null");

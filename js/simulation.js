@@ -32,6 +32,14 @@ laws.fusion = fusionEnabled.checked;
 laws.fusionP = parseFloat(fusionRatio.value);
 laws.fusionI = parseFloat(fusionImpulse.value);
 
+let COUNTER_FREQ = 10;
+let countCycle = 1;
+
+let icount = 0;
+let acount = 0;
+let bcount = 0;
+let ccount = 0;
+let dcount = 0;
 
 /* ----------  UI ELEMENTS ---------- */
 
@@ -52,6 +60,40 @@ magnetismRadVal.textContent = laws.magnetismRadius.toFixed(0);
 timescaleVal.textContent = laws.tscale.toFixed(2);
 fusionRatioVal.textContent = laws.fusionP.toFixed(0);
 fusionImpulseVal.textContent = laws.fusionI.toFixed(0);
+
+/* ----------- COUNT ----------- */
+
+function countBalls() {
+  if (countCycle % COUNTER_FREQ != 0) {
+    countCycle++;
+    return;
+  }
+  icount = balls.length - acount - bcount - ccount - dcount
+  icountVal.textContent = icount;
+  acountVal.textContent = acount;
+  bcountVal.textContent = bcount;
+  ccountVal.textContent = ccount;
+  dcountVal.textContent = dcount;
+  icount = 0;
+  acount = 0;
+  bcount = 0;
+  ccount = 0;
+  dcount = 0;
+  countCycle = 1;
+}
+
+function countBall(a) {
+  if (countCycle % COUNTER_FREQ != 0) return;
+  if (a.typeID == 1) {
+    acount += 1;
+  } else if (a.typeID == 2) {
+    bcount++;
+  } else if (a.typeID == 3) {
+    ccount++;
+  } else if (a.typeID == 4) {
+    dcount++;
+  }
+}
 
 /* ----------  RESIZING ---------- */
 
@@ -135,8 +177,10 @@ function animate(time) {
       phys.resolveMagnetism(balls[i], balls[j], dt);
       phys.resolveBallCollision(balls[i], balls[j], addBall);
     }
+    countBall(balls[i]);
   }
   balls = balls.filter(ball => !ball.remove);   // Remove marked balls
+  countBalls();
   for (const ball of balls) ball.draw(ctx);
   requestAnimationFrame(animate);
 }
