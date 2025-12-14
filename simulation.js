@@ -6,7 +6,7 @@ const BETA_BALL_COLOR = '#ffd152';
 const GAMMA_BALL_COLOR = '#66ff52';
 const DELTA_BALL_COLOR = '#9d52ff';
 const BG_COLOR = '#000';
-const DAMPING = 0.99995; // Apply damping to counteract calculation inaccuracies
+const DAMPING = 0.00005 //0.99995; // Apply damping to counteract calculation inaccuracies
 
 /* ----------  CANVAS SET-UP ---------- */
 
@@ -65,10 +65,10 @@ class Ball {
 
   move(dt) {
     // apply gravity
-    this.vy += gravity * dt;
+    this.vy += gravity * dt * tscale;
     // update position
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
+    this.x += this.vx * dt * tscale;
+    this.y += this.vy * dt * tscale;
   }
 
   // wall collision – perfectly elastic
@@ -175,19 +175,21 @@ function resolveMagnetism(a, b, dt) {
   const nx = dx / dist;
   const ny = dy / dist;
 
+  const tDamping = DAMPING * tscale
+
   // Apply the pull
   // Conditions to avoid divide by zero
   if (nx != 0) {
-    a.vx += nx * magnetism * dt;
-    b.vx -= nx * magnetism * dt;
-    a.vx *= DAMPING;     // Apply damping to counteract calculation inaccuracies
-    b.vx *= DAMPING;     // that have a tendency increase total system energy
+    a.vx += nx * magnetism * dt * tscale;
+    b.vx -= nx * magnetism * dt * tscale;
+    a.vx *= (1 - tDamping);     // Apply damping to counteract calculation inaccuracies
+    b.vx *= (1 - tDamping);     // that have a tendency increase total system energy
   }                      // and destabilizing orbits
   if (ny != 0) {
-    a.vy += ny * magnetism * dt;
-    b.vy -= ny * magnetism * dt;
-    a.vy *= DAMPING;
-    b.vy *= DAMPING;
+    a.vy += ny * magnetism * dt * tscale;
+    b.vy -= ny * magnetism * dt * tscale;
+    a.vy *= (1 - tDamping);
+    b.vy *= (1 - tDamping);
   }
 }
 
