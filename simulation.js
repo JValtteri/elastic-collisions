@@ -198,15 +198,14 @@ function resolveMagnetism(a, b, dt) {
 /* --- FUSION --- */
 
 function resolveFusion(a, b) {
-
   if (!a.magnetic || !b.magnetic) return false;   // Fuse only magnetic elements
   if (Math.random() > (1/fusionP)) return false;  // Fuse chance
   if (a.next == null) return false;               // Don't fuse heavies elements
   if (a.m != b.m) return false;                   // Don't fuse heterogenious pairs
   newX = a.x + (a.x - b.x) / 2
   newY = a.y + (a.y - b.y) / 2
-  newVX = (a.x + b.x) / a.m;
-  newVY = (a.y + b.y) / a.m;
+  newVX = (a.vx + b.vx) / (2*a.m);
+  newVY = (a.vy + b.vy) / (2*a.m);
   let ball = new Ball(newX, newY, newVX, newVY, radius, a.next);
   balls.push(ball);
   a.remove = true;
