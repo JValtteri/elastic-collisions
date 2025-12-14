@@ -54,6 +54,7 @@ class Ball {
     this.color = type.color;
     this.magnetic = type.magnetic;
     this.next = type.next;
+    this.radiate = false;
     this.remove = false;
   }
 
@@ -173,6 +174,10 @@ function resolveMagnetism(a, b, dt) {
   /* Outside the interaction radius? */
   if (dist > a.r + b.r + magnetismRadius) return;
 
+  const forceA = (a.radiate ? -fusionI*100 : magnetism);
+  const forceB = (b.radiate ? -fusionI*100 : magnetism);
+  const force = (forceA + forceB)/2
+
   // normal & tangent vectors
   const nx = dx / dist;
   const ny = dy / dist;
@@ -182,14 +187,14 @@ function resolveMagnetism(a, b, dt) {
   // Apply the pull
   // Conditions to avoid divide by zero
   if (nx != 0) {
-    a.vx += nx * magnetism * dt * tscale;
-    b.vx -= nx * magnetism * dt * tscale;
+    a.vx += nx * force * dt * tscale;
+    b.vx -= nx * force * dt * tscale;
     a.vx *= (1 - tDamping);     // Apply damping to counteract calculation inaccuracies
     b.vx *= (1 - tDamping);     // that have a tendency increase total system energy
   }                      // and destabilizing orbits
   if (ny != 0) {
-    a.vy += ny * magnetism * dt * tscale;
-    b.vy -= ny * magnetism * dt * tscale;
+    a.vy += ny * force * dt * tscale;
+    b.vy -= ny * force * dt * tscale;
     a.vy *= (1 - tDamping);
     b.vy *= (1 - tDamping);
   }
@@ -207,6 +212,7 @@ function resolveFusion(a, b) {
   newVX = (a.vx + b.vx) / (2*a.m);
   newVY = (a.vy + b.vy) / (2*a.m);
   let ball = new Ball(newX, newY, newVX, newVY, radius, a.next);
+  ball.radiate = true;
   balls.push(ball);
   a.remove = true;
   b.remove = true;
@@ -282,6 +288,7 @@ function animate(time) {
 
   // ball-ball collisions
   for (let i = 0; i < balls.length; i++) {
+    balls[i].radiate = false;
     for (let j = i + 1; j < balls.length; j++) {
       resolveMagnetism(balls[i], balls[j], dt);
       resolveBallCollision(balls[i], balls[j]);
